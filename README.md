@@ -14,9 +14,10 @@ Joseph M. Courtney, Qing Ye, Anna E. Nesbitt, Ming Tang, Marcus D. Tuttle, Eric 
 ## How to install
 
 This package requires:
-* numpy version >= 0.15.0
-* [Rosetta](https://www.rosettacommons.org/software) version >= 3.4
+* [numpy](http://www.numpy.org/)
+* [SHIFTX2](http://www.shiftx2.ca/)
 * [MODELLER](https://salilab.org/modeller/)
+* [Rosetta](https://www.rosettacommons.org/software) version >= 3.4
 
 >git clone https://github.com/josephcourtney/compass.git
 
