@@ -1,4 +1,5 @@
-COMPASS - Comparative, Objective Measurement of Protein Architectures by Scoring Shifts =============
+COMPASS - Comparative, Objective Measurement of Protein Architectures by Scoring Shifts
+=============
 
 This software package implements the COMPASS algorithm for the identification of the best structures from a set of models by numerical comparison with unassigned NMR data.
 
