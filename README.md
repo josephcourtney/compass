@@ -18,7 +18,7 @@ This package requires:
 * [Rosetta](https://www.rosettacommons.org/software) version >= 3.4
 * [MODELLER](https://salilab.org/modeller/)
 
-	git clone https://github.com/josephcourtney/compass.git
-	cd compass
-	python setup.py build
-	sudo python setup.py install
+>git clone https://github.com/josephcourtney/compass.git
+>cd compass
+>python setup.py build
+>sudo python setup.py install
