@@ -8,5 +8,6 @@ Full compass calculation from the paper. Modify the generate_structures.py file 
 ## pklist_v_pklist
 To compare two sparky peaklists, first filter the peaks and convert them to csv using the filter.py script. Then feed them into the compass_between.py script as
 >./compass_between.py from.pks to.pks
+
 to measure the COMPASS score form from.pks to to.pks
 
