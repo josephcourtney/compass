@@ -19,6 +19,9 @@ This package requires:
 * [MODELLER](https://salilab.org/modeller/)
 
 >git clone https://github.com/josephcourtney/compass.git
+
 >cd compass
+
 >python setup.py build
+
 >sudo python setup.py install
