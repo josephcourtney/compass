@@ -24,13 +24,22 @@ shutil.copyfile(__file__, compass.model_directory+'/'+os.path.basename(__file__)
 # model_list=[model.pdb_path for model in models]
 
 #To generate models from sequence
-compass.mod.genali( compass.sequence, protein, './working/' )
-model_list = compass.mod.runmodeller( './working/%s.ali' %protein,\
-					working=compass.working_directory, \
-                    database_path = '/path/to/modeller_database', \
-					models_path = compass.model_directory, mod_per_temp=20, max_seq_id=0.98, \
-					min_seq_id=0.15, num_iter=6, max_eval=0.8, gaps=True, loop_refine=False, \
-					md_level=modeller.automodel.refine.slow,  repeat_optimization=1)
+compass.mod.genali( compass.sequence, protein, compass.working_directory )
+model_list = compass.mod.runmodeller(
+	compass.working_directory + '/%s.ali' %protein,
+	working=compass.working_directory,
+        database_path = '/path/to/modeller_database',
+	models_path = compass.model_directory,
+	mod_per_temp=20,
+	max_seq_id=0.98,
+	min_seq_id = 0.15,
+	num_iter = 6,
+	max_eval = 0.8,
+	gaps = True,
+	loop_refine = False,
+	md_level = modeller.automodel.refine.slow,
+	repeat_optimization = 1
+)
 
 
 compass.ros.relaxlist( model_list, relaxprogram='/path/to/rosetta3.4/rosetta_source/bin/relax.default.macosgccrelease', rosettaDB='/path/to/rosetta3.4/rosetta_database', fast = False, CPUnum = 8 )
