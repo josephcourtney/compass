@@ -117,7 +117,7 @@ class PDB:
             rec_name = line[0:6]
             if rec_name == 'MODEL ':
                 current_model = int(line.split()[1])
-                self.structures[str(current_model)+a.chain_id] = Structure()
+                self.structures[str(current_model)+str(current_chain)] = Structure()
             elif rec_name == 'ATOM  ':
                 a = Atom.from_string( line )
                 a.model = current_model
