@@ -30,7 +30,7 @@ try:
 except IOError:
     compass.calculate_shifts( [shiftx_ref_model] )
 shiftx_ref_model.cosy_peaks = compass.simulate_cosy( shiftx_ref_model )
-compass.calculate_mhd_between_models( shiftx_ref_model, ref_model, cutoff = cutoff_val )
+compass.calculate_mhd_between_models( shiftx_ref_model, ref_model )
 shiftx_ref_model.rmsd = compass.calculate_rmsd_between_models( shiftx_ref_model, ref_model )
 models = compass.load_pdbs()
 
