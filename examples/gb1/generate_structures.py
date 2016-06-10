@@ -36,10 +36,13 @@ model_list = compass.mod.runmodeller(
 	num_iter = 6,
 	max_eval = 0.8,
 	gaps = True,
-	loop_refine = False,
-	md_level = modeller.automodel.refine.slow,
-	repeat_optimization = 1
 )
 
 
-compass.ros.relaxlist( model_list, relaxprogram='/path/to/rosetta3.4/rosetta_source/bin/relax.default.macosgccrelease', rosettaDB='/path/to/rosetta3.4/rosetta_database', fast = False, CPUnum = 8 )
+compass.ros.relaxlist(
+	model_list,
+	relaxprogram='/path/to/rosetta3.4/rosetta_source/bin/relax.default.macosgccrelease',
+	rosettaDB='/path/to/rosetta3.4/rosetta_database',
+	fast = False,
+	CPUnum = 8
+)
