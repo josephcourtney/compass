@@ -6,6 +6,9 @@ import subprocess
 from time import time
 import compass.util
 
+threetoone = {"ALA":"A", "CYS":"C", "ASP":"D", "GLU":"E", "PHE":"F", "GLY":"G", "HIS":"H", "ILE":"I", "LYS":"K", "LEU":"L", "MET":"M", "ASN":"N", "PRO":"P", "GLN":"Q", "ARG":"R", "SER":"S", "THR":"T", "VAL":"V", "TRP":"W", "TYR":"Y"}
+onetothree = {v:k for k,v in threetoone.iteritems()}
+
 # Settings
 
 pdb_regex = None
@@ -107,7 +110,7 @@ class Structure:
 
 class PDB:
     def __init__(self, pdb_str):
-        current_chain = False
+        current_chain = 0
         current_model = 0
         self.structures = dict()
         for line in pdb_str.split('\n'):
@@ -255,8 +258,8 @@ def calculate_shifts( model_list, shiftx2=None, CPUnum=8, working='./', replace 
     #remove the temp folders
     for process in processlist:
         for model in process.models:
-            scr=process.folder+'/'+os.path.basename(model.pdb_path)+'.cs'
-            os.rename(scr,model.shiftx_path)
+            scr = process.folder+'/'+os.path.basename(model.pdb_path)+'.cs'
+            os.rename(scr,model.pdb_path+".shiftx")
         shutil.rmtree(process.folder)
         if logger:
             print "####### output for process %d #######" % process.popen.pid
@@ -757,7 +760,7 @@ def calculate_rmsd_between_models( model, reference_model ):
     model.reference_pdb_path = reference_model.pdb_path
     model.reference_cosy_path = reference_model.cosy_path
 
-    model.rmsd = ca_rmsd( model.pdb, reference_model.pdb )
+    model.rmsd = ca_rmsd( model, reference_model )
     return model.rmsd
 
 def generate_report( models, ref_model, name ):
@@ -822,9 +825,6 @@ def ca_rmsd( model_a, model_b ):
 
     pa_cas, pb_cas = aligned_subseqs( model_a, model_b )
 
-    print zip(*[ pair for pair in zip(*[pa_cas, pb_cas]) if pair[0] != None and pair[1] != 1 ])
-    return 0
-
     pa_num_cas = len(list(pa_cas))
     pb_num_cas = len(list(pb_cas))
 
@@ -843,10 +843,61 @@ def ca_rmsd( model_a, model_b ):
 
     R = np.dot( np.dot( Vt.transpose(), r ), U.transpose() )
 
-    rmsd = np.sqrt( ( sum(sum(pa_pos_mat * pa_pos_mat)) + sum(sum(pb_pos_mat * pb_pos_mat)) - 2*sum(s) ) / pa_num_cas )
+    msd = ( ( sum(sum(pa_pos_mat * pa_pos_mat)) + sum(sum(pb_pos_mat * pb_pos_mat)) - 2*sum(s) ) / pa_num_cas )
+    if msd < 0:
+        rmsd = 0.0
+    else:
+        rmsd = np.sqrt(msd)
 
     return rmsd
 
+def average_pairwise_rmsd( model ):
+    sum = 0.0
+    tot_pairs = (len(models)*(len(models)+1)) / 2 - 1
+    
+    for ia,ea in enumerate(models):
+        for eb in models[0,ia]:
+            sum += compass.calculate_rmsd_between_models(ea, eb)
+    return sum / tot_pairs
+
+def rmsd_mat(models):
+    rmsd_mat = np.zeros((len(models), len(models)))
+    for ia,ea in enumerate(models):
+        for ib,eb in enumerate(models):
+            if rmsd_mat[ia,ib] == 0:
+                rmsd_mat[ia,ib] = compass.ca_rmsd(ea,eb)
+    return rmsd_mat
+
+def func_average_pairwise_rmsd(models, rmat, var):
+    assert len(models) != 0
+    ordered_indices = zip(*sorted( list(enumerate(models)), key=lambda m: getattr(m[1], var) ))[0]
+    sum = 0.0
+    num = 0.0
+    tot_pairs = (len(models)*(len(models)+1)) / 2 - 1
+    
+    rmsd_list = []
+    for ia in ordered_indices:
+        for ib in ordered_indices[0:ia]:
+            sum += rmat[ia,ib]
+            num += 1
+        if num > 0:
+            rmsd_list.append(((num/tot_pairs), (sum/num)))
+    return rmsd_list
+
+def func_average_pairwise_rmsd_vs_ref(models, ref_model, var):
+    assert len(models) != 0
+    ordered_indices = zip(*sorted( list(enumerate(models)), key=lambda m: getattr(m[1], var) ))[0]
+    sum = 0.0
+    num = 0.0
+    tot_pairs = (len(models)) / 2 - 1
+    
+    rmsd_list = []
+    for ia in ordered_indices:
+        sum += compass.calculate_rmsd_between_models(models[ia], ref_model)
+        num += 1
+        if num > 0:
+            rmsd_list.append(((num/tot_pairs), (sum/num)))
+    return rmsd_list
 
 def strtoshiftx(input_file,output_file='default',format='default'):
     '''
