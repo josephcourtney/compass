@@ -1,5 +1,5 @@
 import collections
-import os, shutil, random, string, subprocess,sys
+import os, shutil, random, string, subprocess
 
 class Job:
     '''
