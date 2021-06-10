@@ -1,4 +1,5 @@
-import os, shutil, random, string, subprocess
+import collections
+import os, shutil, random, string, subprocess,sys
 
 class Job:
     '''
@@ -407,21 +408,41 @@ def relaxlist(model_list,out_list=[],relaxprogram='default',rosettaDB='default',
             print("ERROR: Length of output_list must match length of model_list")
         output_list=[os.path.abspath(path) for path in out_list]
     temp_path_list=[]
-    POPEN_list=[]
+    POPEN_deque = collections.deque()
+    modelled = {}
     for i in range(len(model_list)):
-        (temp_path,POPEN)=relax1model(model_list[i],relaxprogram=relaxprogram,rosettaDB=rosettaDB,fast=fast,WAIT=False,logger=logger)
-        temp_path_list.append(temp_path)
-        POPEN_list.append(POPEN)
-        print "Popen object created with PID:"
-        print POPEN.pid
-        if ((i+1)%CPUnum==0) or (i==len(model_list)-1):
-            for j in range(max(0,i-CPUnum+1),i+1):
-                POPEN_list[j].wait()
-            if logger:
-                print "####### output for process %d #######" % POPEN_list[j].pid
-                print POPEN_list[j].stdout.read()
+    #    print >> sys.stderr, "relax1model  {}".format(model_list[i])
+        if model_list[i] not in modelled: #Don't model same file twice
+            (temp_path,POPEN)=relax1model(model_list[i],relaxprogram=relaxprogram,rosettaDB=rosettaDB,fast=fast,WAIT=False,logger=logger)
+            temp_path_list.append(temp_path)
+            modelled[model_list[i]] = temp_path
+            POPEN_deque.append(POPEN)
 
+            print "Popen object created with PID:"
+            print POPEN.pid
+        else:
+            temp_path_list.append(modelled[model_list[i]])
+
+        if len(POPEN_deque) >= CPUnum:
+            pobj = POPEN_deque.popleft()
+            pobj.wait()
+            if logger:
+                print "####### output for process %d #######" % pobj.pid
+                print pobj.stdout.read()
+
+    while len(POPEN_deque) > 0: #wait for remaining processes
+        pobj = POPEN_deque.popleft()
+        pobj.wait()
+        if logger:
+            print "####### output for process %d #######" % pobj.pid
+            print pobj.stdout.read()
+
+    renamed = set()
     for i in range(len(model_list)):
-        os.rename(temp_path_list[i],output_list[i])
+    #    print >> sys.stderr, "i {} from {} to {}".format(i,temp_path_list[i],output_list[i])
+        tempfile = temp_path_list[i]
+        if tempfile not in renamed:
+            os.rename(tempfile,output_list[i])
+            renamed.add(tempfile)
 
     return output_list
