@@ -242,7 +242,7 @@ def calculate_shifts( model_list, shiftx2=None, CPUnum=8, working='./', replace 
     #create calculation subprocesses
     for i in range(len(processlist)):
         os.chdir(processlist[i].folder)
-        argument = ['python', shiftx2, '-b', '*.pdb', '-f', 'BMRB', '-a', 'ALL']
+        argument = ['/usr/bin/python', shiftx2, '-b', '*.pdb', '-f', 'BMRB', '-a', 'ALL']
         if logger:
             processlist[i].popen = subprocess.Popen( args = argument, stderr = subprocess.STDOUT, stdout = subprocess.PIPE )
         else:
